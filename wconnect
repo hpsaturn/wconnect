@@ -1,0 +1,170 @@
+#! /bin/sh
+###################################################################
+# WPA Connect
+# 2009-2015 Hpsaturn v1.3
+# hpsaturn@gmail.com
+#
+# Archivos de configuracion: 
+# deben ser creados con wpa_passphrase en $CPATH previamente 
+# y deben tener de prefijo: wpa_ y sufijo .conf, por ej: 
+# wpa_casa.conf 
+#
+# ejecucion:
+#
+# #connect xxxx (carga configuracion especifica para wpa_xxxx.conf)
+# #connect      (carga configuracion por defecto)
+# #connect stop (mata la conexion)
+#
+# REV000: Creación de funciones para open network, custom parametro
+# RE0001: Creación de funcion para posible red wep
+# REV002: Anexo para metro para scan basico. (scan)
+# REV003: Funcion para Ad-Hoc, ej: connect adhoc essid key. Separacion
+#         de algunas funciones para optimizar codigo
+# REV004: Correccion de mensajes de funciones
+# REV005: Anexo modo master por WEP para repartir internet facil
+# REV006: Open networks y scan con enable device
+# REV007: Publish on github https://github.com/hpsaturn/wconnect
+###################################################################
+
+#config
+CONFIG="$1"
+CPATH=~/.wpa_networks
+DEVICE=wlan0
+MODULE=iwlwifi
+#endconfig
+
+#functions
+wpa_connect () {
+  if [ -e $CPATH/wpa_$CONFIG.conf ]; then
+    #ifconfig eth0 down
+    enable_device
+    iwconfig $DEVICE essid $CONFIG
+    echo -n "wpa_connect.."
+    wpa_supplicant -B -c $CPATH/wpa_$CONFIG.conf -i $DEVICE -s 2> /dev/null
+    sleep 2
+    echo  "done."
+    dhclient_service
+  else
+    echo "config file: $CPATH/wpa_$CONFIG.conf not found!!"
+    exit 1
+  fi 
+}
+
+wpa_stop () {
+  echo -n "wpa_stop.."
+  killall wpa_supplicant 2> /dev/null
+  killall dhclient 2> /dev/null
+  killall dhclient 2> /dev/null
+  ifconfig $DEVICE down
+  echo "done."
+}
+
+open_network () {
+  echo -n "connect to $1.."
+  iwconfig $DEVICE essid $1
+  echo "done."
+  dhclient_service
+}
+
+wep_network () {
+  echo -n "connect to $1.."
+  iwconfig $DEVICE mode managed essid $1 key s:"$2"
+  echo "done."
+  dhclient_service
+}
+
+adhoc_network () {
+  remove_module
+  sleep 2
+  install_module
+  sleep 2
+  echo -n "connect to $1.."
+  iwconfig $DEVICE mode Ad-Hoc
+  sleep 1
+  iwconfig $DEVICE essid $1 key s:'$2'
+  echo "done."
+  enable_device 
+  dhclient_service
+}
+
+remove_module () {
+  echo -n "remove modules.."
+  modprobe -r $MODULE
+  echo "done."
+}
+
+install_module () {
+  echo -n "install modules.."
+  modprobe $MODULE
+  echo "done."
+}
+
+scan_networks () {
+  enable_device 
+  iwlist $DEVICE scanning
+}
+
+enable_device () {
+  echo -n "enable device $DEVICE.."
+  ifconfig $DEVICE up
+  sleep 1
+  echo "done."
+}
+
+dhclient_service () {
+  echo -n "dhclient service.."
+  dhclient $DEVICE 2> /dev/null
+  echo "done."
+}
+
+switchToEth0(){
+  wpa_stop
+  remove_module
+  echo -n "dhclient service.."
+  dhclient eth0 2> /dev/null
+  echo "done."
+}
+
+#########################################################
+######################## MAIN ###########################
+#########################################################
+
+# Si parametro nulo, entonces carga configuracion
+# por defecto.
+
+if [ "$CONFIG" = "" ]; then
+    CONFIG="default"
+    wpa_connect
+else
+  case "$1" in
+    scan)
+      scan_networks
+      ;;
+    open)
+      open_network $2
+      ;;
+    remove)
+      remove_module
+      ;;
+    install)
+      install_module
+      ;;
+    stop)
+      wpa_stop
+      ;;
+    wep)
+      wep_network $2 $3   # essid key
+      ;;
+    dhoc)
+      adhoc_network $2 $3   # essid key
+      ;;
+    switch)
+      switchToEth0
+      ;;
+    *)
+      wpa_connect
+      ;;
+  esac
+fi
+
+exit 0
