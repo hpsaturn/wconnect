@@ -24,18 +24,21 @@
 # REV005: Anexo modo master por WEP para repartir internet facil
 # REV006: Open networks y scan con enable device
 # REV007: Publish on github https://github.com/hpsaturn/wconnect
+# REV008: Add stop after wpa connect. Fix remove driver
 ###################################################################
 
 #config
 CONFIG="$1"
 CPATH=~/.wpa_networks
 DEVICE=wlan0
-MODULE=iwlwifi
+MODULE=iwldvm
+#MODULE=iwlwifi
 #endconfig
 
 #functions
 wpa_connect () {
   if [ -e $CPATH/wpa_$CONFIG.conf ]; then
+    wpa_stop
     #ifconfig eth0 down
     enable_device
     iwconfig $DEVICE essid $CONFIG
@@ -89,7 +92,7 @@ adhoc_network () {
 
 remove_module () {
   echo -n "remove modules.."
-  modprobe -r $MODULE
+  modprobe -rv $MODULE
   echo "done."
 }
 
@@ -101,7 +104,7 @@ install_module () {
 
 scan_networks () {
   enable_device 
-  iwlist $DEVICE scanning
+  iwlist $DEVICE scanning | grep -i ssid
 }
 
 enable_device () {
