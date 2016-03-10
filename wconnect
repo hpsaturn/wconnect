@@ -38,6 +38,7 @@ MODULE=iwldvm
 #functions
 wpa_connect () {
   if [ -e $CPATH/wpa_$CONFIG.conf ]; then
+    check_module
     wpa_stop
     #ifconfig eth0 down
     enable_device
@@ -90,8 +91,16 @@ adhoc_network () {
   dhclient_service
 }
 
+check_module () {
+  ismodule=`lsmod | grep $MODULE`
+  if [ "$ismodule" = "" ]; then
+    install_module
+  fi
+}
+
 remove_module () {
   echo -n "remove modules.."
+  wpa_stop
   modprobe -rv $MODULE
   echo "done."
 }
