@@ -37,104 +37,119 @@ MODULE=iwldvm
 
 #functions
 wpa_connect () {
-  if [ -e $CPATH/wpa_$CONFIG.conf ]; then
-    check_module
-    wpa_stop
-    #ifconfig eth0 down
-    enable_device
-    iwconfig $DEVICE essid $CONFIG
-    echo -n "wpa_connect.."
-    wpa_supplicant -B -c $CPATH/wpa_$CONFIG.conf -i $DEVICE -s 2> /dev/null
-    sleep 2
-    echo  "done."
-    dhclient_service
-  else
-    echo "config file: $CPATH/wpa_$CONFIG.conf not found!!"
-    exit 1
-  fi 
+    if [ -e $CPATH/wpa_$CONFIG.conf ]; then
+        check_module
+        wpa_stop
+        #ifconfig eth0 down
+        enable_device
+        iwconfig $DEVICE essid $CONFIG
+        echo -n "wpa_connect.."
+        wpa_supplicant -B -c $CPATH/wpa_$CONFIG.conf -i $DEVICE -s 2> /dev/null
+        sleep 2
+        echo  "done."
+        dhclient_service
+    else
+        echo "config file: $CPATH/wpa_$CONFIG.conf not found!!"
+        exit 1
+    fi 
 }
 
 wpa_stop () {
-  echo -n "wpa_stop.."
-  killall wpa_supplicant 2> /dev/null
-  killall dhclient 2> /dev/null
-  killall dhclient 2> /dev/null
-  ifconfig $DEVICE down
-  echo "done."
+    echo -n "wpa_stop.."
+    killall wpa_supplicant 2> /dev/null
+    killall dhclient 2> /dev/null
+    killall dhclient 2> /dev/null
+    ifconfig $DEVICE down
+    echo "done."
+}
+
+wpa_reload () {
+    remove_module
+    sleep 1
+    install_module
+    enable_device
+    echo -n "searching current networks.."
+    iwlist $DEVICE scanning | grep -i ssid | sed s/ESSID:\"// | sed s/\"// | sed 's/                    //' > /tmp/current_networks
+    cd $CPATH
+    grep -orf /tmp/current_networks | head -n 1 | awk -v FS="(wpa_|.conf)" '{print $2}' > /tmp/current_config
+    CONFIG=`cat /tmp/current_config`
+    echo "done."
+    echo "connecting with $CONFIG.."
+    wpa_connect
 }
 
 open_network () {
-  echo -n "connect to $1.."
-  iwconfig $DEVICE essid $1
-  echo "done."
-  dhclient_service
+    echo -n "connect to $1.."
+    iwconfig $DEVICE essid $1
+    echo "done."
+    dhclient_service
 }
 
 wep_network () {
-  echo -n "connect to $1.."
-  iwconfig $DEVICE mode managed essid $1 key s:"$2"
-  echo "done."
-  dhclient_service
+    echo -n "connect to $1.."
+    iwconfig $DEVICE mode managed essid $1 key s:"$2"
+    echo "done."
+    dhclient_service
 }
 
 adhoc_network () {
-  remove_module
-  sleep 2
-  install_module
-  sleep 2
-  echo -n "connect to $1.."
-  iwconfig $DEVICE mode Ad-Hoc
-  sleep 1
-  iwconfig $DEVICE essid $1 key s:'$2'
-  echo "done."
-  enable_device 
-  dhclient_service
+    remove_module
+    sleep 2
+    install_module
+    sleep 2
+    echo -n "connect to $1.."
+    iwconfig $DEVICE mode Ad-Hoc
+    sleep 1
+    iwconfig $DEVICE essid $1 key s:'$2'
+    echo "done."
+    enable_device 
+    dhclient_service
 }
 
 check_module () {
-  ismodule=`lsmod | grep $MODULE`
-  if [ "$ismodule" = "" ]; then
-    install_module
-  fi
+    ismodule=`lsmod | grep $MODULE`
+    if [ "$ismodule" = "" ]; then
+        install_module
+    fi
 }
 
 remove_module () {
-  echo -n "remove modules.."
-  wpa_stop
-  modprobe -rv $MODULE
-  echo "done."
+    echo -n "remove modules.."
+    wpa_stop
+    modprobe -rv $MODULE
+    echo "done."
 }
 
 install_module () {
-  echo -n "install modules.."
-  modprobe $MODULE
-  echo "done."
+    echo -n "install modules.."
+    modprobe $MODULE
+    echo "done."
 }
 
 scan_networks () {
-  enable_device 
-  iwlist $DEVICE scanning | grep -i ssid
+    enable_device 
+    iwlist $DEVICE scanning 
 }
 
 enable_device () {
-  echo -n "enable device $DEVICE.."
-  ifconfig $DEVICE up
-  sleep 1
-  echo "done."
+    echo -n "enable device $DEVICE.."
+    ifconfig $DEVICE up
+    sleep 1
+    echo "done."
 }
 
 dhclient_service () {
-  echo -n "dhclient service.."
-  dhclient $DEVICE 2> /dev/null
-  echo "done."
+    echo -n "dhclient service.."
+    dhclient $DEVICE 2> /dev/null
+    echo "done."
 }
 
 switchToEth0(){
-  wpa_stop
-  remove_module
-  echo -n "dhclient service.."
-  dhclient eth0 2> /dev/null
-  echo "done."
+    wpa_stop
+    remove_module
+    echo -n "dhclient service.."
+    dhclient eth0 2> /dev/null
+    echo "done."
 }
 
 #########################################################
@@ -148,35 +163,38 @@ if [ "$CONFIG" = "" ]; then
     CONFIG="default"
     wpa_connect
 else
-  case "$1" in
-    scan)
-      scan_networks
-      ;;
-    open)
-      open_network $2
-      ;;
-    remove)
-      remove_module
-      ;;
-    install)
-      install_module
-      ;;
-    stop)
-      wpa_stop
-      ;;
-    wep)
-      wep_network $2 $3   # essid key
-      ;;
-    dhoc)
-      adhoc_network $2 $3   # essid key
-      ;;
-    switch)
-      switchToEth0
-      ;;
-    *)
-      wpa_connect
-      ;;
-  esac
+    case "$1" in
+        scan)
+            scan_networks
+            ;;
+        open)
+            open_network $2
+            ;;
+        remove)
+            remove_module
+            ;;
+        install)
+            install_module
+            ;;
+        stop)
+            wpa_stop
+            ;;
+        wep)
+            wep_network $2 $3   # essid key
+            ;;
+        dhoc)
+            adhoc_network $2 $3   # essid key
+            ;;
+        switch)
+            switchToEth0
+            ;;
+        reload)
+            wpa_reload 
+            ;;
+        *)
+            wpa_connect
+            ;;
+    esac
 fi
 
 exit 0
