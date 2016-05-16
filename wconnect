@@ -63,19 +63,25 @@ wpa_stop () {
     echo "done."
 }
 
-wpa_reload () {
-    remove_module
+wpa_auto_connect () {
+    echo -n "scanning networks."
+    remove_module 1> /dev/null
+    echo -n "."
     sleep 1
-    install_module
-    enable_device
-    echo -n "searching current networks.."
-    iwlist $DEVICE scanning | grep -i ssid | sed s/ESSID:\"// | sed s/\"// | sed 's/                    //' > /tmp/current_networks
+    echo -n "."
+    install_module 1> /dev/null
+    echo -n "."
+    enable_device 1> /dev/null
+    echo -n "."
+    iwlist $DEVICE scanning|grep -i ssid|sed s/ESSID:\"//|sed s/\"//|sed 's/                    //'>/tmp/current_networks
+    echo -n "."
     cd $CPATH
-    grep -orf /tmp/current_networks | head -n 1 | awk -v FS="(wpa_|.conf)" '{print $2}' > /tmp/current_config
+    grep -orf /tmp/current_networks|head -n 1|awk -v FS="(wpa_|.conf)" '{print $2}'>/tmp/current_config
     CONFIG=`cat /tmp/current_config`
     echo "done."
-    echo "connecting with $CONFIG.."
-    wpa_connect
+    echo -n "connecting with: $CONFIG.."
+    wpa_connect 1> /dev/null
+    echo "done."
 }
 
 open_network () {
@@ -160,8 +166,7 @@ switchToEth0(){
 # por defecto.
 
 if [ "$CONFIG" = "" ]; then
-    CONFIG="default"
-    wpa_connect
+    wpa_auto_connect
 else
     case "$1" in
         scan)
@@ -188,8 +193,8 @@ else
         switch)
             switchToEth0
             ;;
-        reload)
-            wpa_reload 
+        auto)
+            wpa_auto_connect
             ;;
         *)
             wpa_connect
