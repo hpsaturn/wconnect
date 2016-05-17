@@ -15,7 +15,7 @@
 # Main Commands:
 #
 # Add new network:
-# $ connect name ssid passw 
+# $ connect add name ssid passw 
 #
 # Connect to network automatically
 # $ sudo connect 

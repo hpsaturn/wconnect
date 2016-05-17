@@ -14,7 +14,7 @@ WPA, WEP, Open and Ad-Hoc wifi networks manager.
 ##### Add new network:
 
    ```
-   $ wconnect name ssid passw 
+   $ wconnect add name ssid passw 
    ```
 
 ##### Connect to network automatically
@@ -53,4 +53,5 @@ WPA, WEP, Open and Ad-Hoc wifi networks manager.
 ##### Tools commands:
 
 - **switch**    (switch to eth0)
+- **add**       (add new network to config directory)
 
