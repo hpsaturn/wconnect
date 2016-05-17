@@ -1,55 +1,54 @@
 # Basic Wireless Manager 
 
+WPA, WEP, Open and Ad-Hoc wifi networks manager. 
 
- WPA Connect (command wconnect)
- 2009-2015 Hpsaturn v1.3
- hpsaturn@gmail.com
+(2009-2016 @Hpsaturn)
 
 ## Installation:
 
- - mkdir CPATH and link symbolic on home root to this (see config section)
- - copy this script on ~/bin and make link simbolic on /usr/bin
+1. mkdir CPATH and link symbolic on home root to this (see config section)
+2. copy this script on ~/bin and make link simbolic on /usr/bin
 
 ## Main Commands:
 
-#### Add new network:
+##### Add new network:
 
    ```
    $ wconnect name ssid passw 
    ```
 
-#### Connect to network automatically
+##### Connect to network automatically
 
    ```
    $ sudo wconnect 
    ```
 
-#### Force connect to specific network
+##### Force connect to specific network
 
    ```
    $ sudo wconnect networkname
    ```
 
-#### Scan networks
+##### Scan networks
 
    ```
    $ sudo wconnect scanning
    ```
 
-## Others commands (WPA):
+### Others commands (WPA):
 
-**stop**      (down interface and kill wpasupplicant)
-**remove**    (remove driver module)
-**install**   (install driver module)
-**auto**      (default)(scan and search networks on config directory then connect)
+- **stop**      (down interface and kill wpasupplicant)
+- **remove**    (remove driver module)
+- **install**   (install driver module)
+- **auto**      (default)(scan and search networks on config directory then connect)
 
-## Others wifi encryption:
+### Others Wifi encryption:
 
-   open ssid         (connect to open network)
-   adhoc ssid passw  (connect to Ad-Hoc wifi)
-   wep ssid passw    (connect to wep wifi) 
+- **open** ssid          (connect to open network)
+- **adhoc** ssid passw   (connect to Ad-Hoc wifi)
+- **wep** ssid passw     (connect to wep wifi) 
 
-## Others:
+### Others commands:
 
-**switch**    (switch to eth0)
+- **switch**    (switch to eth0)
 
