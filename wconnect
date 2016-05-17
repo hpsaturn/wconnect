@@ -1,7 +1,7 @@
 #! /bin/sh
 ###################################################################
 # WPA Connect (command connect)
-# 2009-2015 Hpsaturn v1.3
+# 2009-2016 Hpsaturn v1.4
 # hpsaturn@gmail.com
 ###################################################################
 # 
@@ -46,29 +46,30 @@
 #
 ####################################################################
 #
-# REV000: Creación de funciones para open network, custom parametro
-# RE0001: Creación de funcion para posible red wep
-# REV002: Anexo para metro para scan basico. (scan)
-# REV003: Funcion para Ad-Hoc, ej: connect adhoc essid key. Separacion
-#         de algunas funciones para optimizar codigo
-# REV004: Correccion de mensajes de funciones
-# REV005: Anexo modo master por WEP para repartir internet facil
-# REV006: Open networks y scan con enable device
+# REV000: open network methods and custom parameters
+# RE0001: wep network methods
+# REV002: scan functions and Ad-Hoc support
+# REV003: Refactor on basic methods
+# REV004: Add messages on main methods
+# REV005: WEP tethering
+# REV006: Open networks fixes and stop, install and remove device
 # REV007: Publish on github https://github.com/hpsaturn/wconnect
 # REV008: Add stop after wpa connect. Fix remove driver
 # REV009: Automatic reconnection, add network, change default method
+####################################################################
 
-###################################################################
+###########################
+######## CONFIG ###########
+###########################
 
-#config
 CONFIG="$1"
 CPATH=~/.wpa_networks
 DEVICE=wlan0
 MODULE=iwldvm
 #MODULE=iwlwifi
-#endconfig
 
-#functions
+#### endconfig ######
+
 wpa_connect () {
     if [ -e $CPATH/wpa_$CONFIG.conf ]; then
         check_module
@@ -202,11 +203,9 @@ network_add () {
 ######################## MAIN ###########################
 #########################################################
 
-# Si parametro nulo, entonces carga configuracion
-# por defecto.
 
 if [ "$CONFIG" = "" ]; then
-    wpa_auto_connect
+    wpa_auto_connect  # not config try auto connection
 else
     case "$1" in
         scan)
