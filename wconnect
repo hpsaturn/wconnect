@@ -158,6 +158,13 @@ switchToEth0(){
     echo "done."
 }
 
+network_add () {
+    echo "creating config for $1.."
+    wpa_passphrase "$2" "$3" > $CPATH/wpa_$1.conf
+    cat $CPATH/wpa_$1.conf
+    echo "done."
+}
+
 #########################################################
 ######################## MAIN ###########################
 #########################################################
@@ -195,6 +202,9 @@ else
             ;;
         auto)
             wpa_auto_connect
+            ;;
+        add)
+            network_add $2 $3 $4
             ;;
         *)
             wpa_connect
