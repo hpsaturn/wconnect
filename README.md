@@ -35,20 +35,22 @@ WPA, WEP, Open and Ad-Hoc wifi networks manager.
    $ sudo wconnect scanning
    ```
 
-### Others commands (WPA):
+## Others commands:
+
+##### General:
 
 - **stop**      (down interface and kill wpasupplicant)
 - **remove**    (remove driver module)
 - **install**   (install driver module)
 - **auto**      (default)(scan and search networks on config directory then connect)
 
-### Others Wifi encryption:
+##### Alternative encryption:
 
 - **open** ssid          (connect to open network)
 - **adhoc** ssid passw   (connect to Ad-Hoc wifi)
 - **wep** ssid passw     (connect to wep wifi) 
 
-### Others commands:
+##### Tools commands:
 
 - **switch**    (switch to eth0)
 
