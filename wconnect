@@ -1,19 +1,50 @@
 #! /bin/sh
 ###################################################################
-# WPA Connect
+# WPA Connect (command connect)
 # 2009-2015 Hpsaturn v1.3
 # hpsaturn@gmail.com
+###################################################################
+# 
+# Installation:
 #
-# Archivos de configuracion: 
-# deben ser creados con wpa_passphrase en $CPATH previamente 
-# y deben tener de prefijo: wpa_ y sufijo .conf, por ej: 
-# wpa_casa.conf 
+# - mkdir CPATH and link symbolic on home root to this (see config section)
+# - copy this script on ~/bin and make link simbolic on /usr/bin
 #
-# ejecucion:
+#__________________________________________________________________
 #
-# #connect xxxx (carga configuracion especifica para wpa_xxxx.conf)
-# #connect      (carga configuracion por defecto)
-# #connect stop (mata la conexion)
+# Main Commands:
+#
+# Add new network:
+# $ connect name ssid passw 
+#
+# Connect to network automatically
+# $ sudo connect 
+#
+# Force connect to specific network
+# $ sudo connect networkname
+#
+# Scan networks
+# $ sudo connect scanning
+#_______________________________________________________________
+#
+# Others commands (WPA):
+#
+# stop      (down interface and kill wpasupplicant)
+# remove    (remove driver module)
+# install   (install driver module)
+# auto      (default)(scan and search networks on config directory then connect)
+#
+# Others wifi encryption:
+#
+# open ssid         (connect to open network)
+# adhoc ssid passw  (connect to Ad-Hoc wifi)
+# wep ssid passw    (connect to wep wifi) 
+#
+# Others:
+#
+# switch    (switch to eth0)
+#
+####################################################################
 #
 # REV000: Creación de funciones para open network, custom parametro
 # RE0001: Creación de funcion para posible red wep
@@ -25,6 +56,8 @@
 # REV006: Open networks y scan con enable device
 # REV007: Publish on github https://github.com/hpsaturn/wconnect
 # REV008: Add stop after wpa connect. Fix remove driver
+# REV009: Automatic reconnection, add network, change default method
+
 ###################################################################
 
 #config
@@ -194,7 +227,7 @@ else
         wep)
             wep_network $2 $3   # essid key
             ;;
-        dhoc)
+        adhoc)
             adhoc_network $2 $3   # essid key
             ;;
         switch)
