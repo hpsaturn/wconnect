@@ -99,10 +99,12 @@ wpa_stop () {
 
 wpa_auto_connect () {
     echo -n "scanning networks."
+    install_module 1> /dev/null
+    echo -n "."
+    sleep 1
     remove_module 1> /dev/null
     echo -n "."
     sleep 1
-    echo -n "."
     install_module 1> /dev/null
     echo -n "."
     enable_device 1> /dev/null
@@ -180,7 +182,7 @@ enable_device () {
 
 dhclient_service () {
     echo -n "dhclient service.."
-    dhclient $DEVICE 2> /dev/null
+    dhclient $DEVICE &> /dev/null
     echo "done."
 }
 
