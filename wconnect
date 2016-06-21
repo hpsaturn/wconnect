@@ -97,6 +97,7 @@ wpa_stop () {
 }
 
 wpa_auto_connect () {
+
     echo -n "scanning networks."
     install_module 1> /dev/null
     echo -n "."
@@ -113,8 +114,15 @@ wpa_auto_connect () {
     cd $CPATH
     grep -orf /tmp/current_networks|head -n 1|awk -v FS="(wpa_|.conf)" '{print $2}'>/tmp/current_config
     CONFIG=`cat /tmp/current_config`
-    echo "done."
-    wpa_connect 
+
+    if [ "$CONFIG" = "" ]; then
+        echo "not found network, retry.."
+        wpa_auto_connect
+    else
+        echo "done."
+        wpa_connect 
+    fi
+
 }
 
 open_network () {
