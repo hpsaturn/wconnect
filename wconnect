@@ -77,6 +77,7 @@ wpa_connect () {
         wpa_stop 1> /dev/null; echo -n "."
         enable_device 1> /dev/null; echo -n "."
         iwconfig $DEVICE essid $CONFIG; echo -n "."
+        sleep 1
         wpa_supplicant -B -c $CPATH/wpa_$CONFIG.conf -i $DEVICE -s 2> /dev/null; echo -n "."
         sleep 1 ; echo -n "."
         dhclient_service 1> /dev/null; echo -n "."
@@ -127,7 +128,7 @@ wpa_auto_connect () {
 
 open_network () {
     echo -n "connect to $1.."
-    iwconfig $DEVICE essid $1
+    iwconfig $DEVICE essid "$1"
     echo "done."
     dhclient_service
 }
@@ -181,7 +182,7 @@ scan_networks () {
 enable_device () {
     echo -n "enable device $DEVICE.."
     ifconfig $DEVICE up
-    sleep 1
+    sleep 2
     echo "done."
 }
 
@@ -219,13 +220,19 @@ else
             scan_networks
             ;;
         open)
-            open_network $2
+            open_network "$2"
             ;;
         remove)
             remove_module
             ;;
         install)
             install_module
+            ;;
+        reload)
+            remove_module
+            sleep 1
+            install_module
+            wpa_auto_connect
             ;;
         stop)
             wpa_stop
