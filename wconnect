@@ -56,6 +56,7 @@
 # REV007: Publish on github https://github.com/hpsaturn/wconnect
 # REV008: Add stop after wpa connect. Fix remove driver
 # REV009: Automatic reconnection, add network, change default method
+# REV010: Added basic help command
 ####################################################################
 
 ###########################
@@ -64,16 +65,22 @@
 
 CONFIG="$1"
 CPATH=~/.wpa_networks
-DEVICE=wlan0
+DEVICE=wlo1
 MODULE=iwldvm
 #MODULE=iwlwifi
 
 #### endconfig ######
 
+show_help () {
+    printf "\n%s\n\n" "Available commands:"
+    printf "%s\t\t\t%s\n" "scan" "scan wifi networks"
+    printf "%s\t\t%s\n" "open <network>"  "connect to open network"
+}
+
 wpa_connect () {
     if [ -e $CPATH/wpa_$CONFIG.conf ]; then
+        check_module
         echo -n "connecting with: $CONFIG"
-        check_module; echo -n "."
         wpa_stop 1> /dev/null; echo -n "."
         enable_device 1> /dev/null; echo -n "."
         iwconfig $DEVICE essid $CONFIG; echo -n "."
@@ -100,13 +107,13 @@ wpa_stop () {
 wpa_auto_connect () {
 
     echo -n "scanning networks."
-    install_module 1> /dev/null
+    #install_module 1> /dev/null
     echo -n "."
-    wpa_stop 1> /dev/null
+    #wpa_stop 1> /dev/null
     sleep 1
-    remove_module 1> /dev/null
+    #remove_module 1> /dev/null
     echo -n "."
-    install_module 1> /dev/null
+    #install_module 1> /dev/null
     echo -n "."
     enable_device 1> /dev/null
     echo -n "."
@@ -176,7 +183,8 @@ install_module () {
 
 scan_networks () {
     enable_device 
-    iwlist $DEVICE scanning 
+    printf "\n\n%s\n\n" "Available networks:"
+    iwlist $DEVICE scanning | egrep -i 'ESSID' | sed 's/ESSID://' 
 }
 
 enable_device () {
@@ -251,6 +259,9 @@ else
             ;;
         add)
             network_add $2 $3 $4
+            ;;
+        help)
+            show_help
             ;;
         *)
             wpa_connect
